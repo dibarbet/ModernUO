@@ -4,7 +4,7 @@
         <Authors>Kamron Batman</Authors>
         <Company>ModernUO</Company>
         <Copyright>2019-2023</Copyright>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <LangVersion>12</LangVersion>
         <PublicRelease>true</PublicRelease>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
