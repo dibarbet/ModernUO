@@ -18,7 +18,7 @@ jobs:
       run: dotnet pack -c Release
 
     - name: Add Tool
-      run: dotnet tool install --add-source .\MSBuildWorkspaceRunner\nupkg\ MSBuildWorkspaceRunner
+      run: dotnet tool restore
 
     - name: Run Tool
-      run: dotnet tool run msbuildworkspace "${{ github.workspace }}/ModernUO.sln"
+      run: dotnet tool run ModernUOSchemaGenerator -- "${{ github.workspace }}/ModernUO.sln"
