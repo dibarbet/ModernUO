@@ -14,11 +14,5 @@ jobs:
       with:
         global-json-file: global.json
 
-    - name: Pack
-      run: dotnet pack -c Release
-
-    - name: Add Tool
-      run: dotnet tool restore
-
-    - name: Run Tool
-      run: dotnet tool run ModernUOSchemaGenerator -- "${{ github.workspace }}/ModernUO.sln"
+    - name: 'Build'
+      run: ./publish.cmd Release
