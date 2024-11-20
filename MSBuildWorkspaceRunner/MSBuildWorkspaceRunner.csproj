@@ -9,7 +9,6 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>msbuildworkspace</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
-    <PackageVersion>1.1.1</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
