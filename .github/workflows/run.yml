@@ -1,0 +1,22 @@
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install .NET 9
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+
+    - name: Pack
+      run: dotnet pack -c Release
+
+    - name: Add Tool
+      run: dotnet tool install --add-source .\MSBuildWorkspaceRunner\nupkg\ MSBuildWorkspaceRunner
+
+    - name: Run Tool
+      run: dotnet tool run msbuildworkspace "${{ github.workspace }}/ModernUO.sln"
