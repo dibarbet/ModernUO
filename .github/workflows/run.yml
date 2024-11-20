@@ -1,5 +1,9 @@
 on: workflow_dispatch
 
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
+
 jobs:
   build:
     runs-on: windows-latest
