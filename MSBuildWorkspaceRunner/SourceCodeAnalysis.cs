@@ -1,0 +1,88 @@
+/*************************************************************************
+ * ModernUO                                                              *
+ * Copyright 2019-2024 - ModernUO Development Team                       *
+ * Email: hi@modernuo.com                                                *
+ * File: SourceCodeAnalysis.cs                                           *
+ *                                                                       *
+ * This program is free software: you can redistribute it and/or modify  *
+ * it under the terms of the GNU General Public License as published by  *
+ * the Free Software Foundation, either version 3 of the License, or     *
+ * (at your option) any later version.                                   *
+ *                                                                       *
+ * You should have received a copy of the GNU General Public License     *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
+ *************************************************************************/
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using Microsoft.Build.Locator;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.MSBuild;
+
+namespace ModernUO.Serialization.SchemaGenerator;
+
+public static class SourceCodeAnalysis
+{
+    public static async Task<IEnumerable<Project>> GetProjectsAsync(string solutionPath)
+    {
+        if (!File.Exists(solutionPath) || !solutionPath.EndsWith(".sln", StringComparison.Ordinal))
+        {
+            throw new FileNotFoundException($"Could not open a valid solution at location {solutionPath}");
+        }
+
+        MSBuildLocator.RegisterDefaults();
+
+        return await LoadProjectsAsync(solutionPath);
+    }
+
+    private static async Task<IEnumerable<Project>> LoadProjectsAsync(string solutionPath)
+    {
+        using var workspace = MSBuildWorkspace.Create();
+        workspace.WorkspaceFailed += (_, args) => Console.WriteLine(args.Diagnostic.Message);
+
+        workspace.WorkspaceChanged += (_, args) =>
+        {
+            if (args.Kind == WorkspaceChangeKind.ProjectAdded)
+            {
+                Console.WriteLine($"Project added: {args.ProjectId}");
+            }
+            else if (args.Kind == WorkspaceChangeKind.SolutionAdded)
+            {
+                Console.WriteLine($"Solution added: {args.NewSolution.FilePath}");
+            }
+        };
+
+        
+
+        var solution = await workspace.OpenSolutionAsync(solutionPath, progress: new Progress());
+
+        return solution
+            .Projects
+            .Where(project => !project.Name.EndsWith(".Tests", StringComparison.Ordinal) && project.Name != "Benchmarks")
+            .Select(
+                project =>
+                {
+                    foreach (var reference in project.AnalyzerReferences)
+                    {
+                        if (reference.Display == "ModernUO.Serialization.Generator")
+                        {
+                            project = project.RemoveAnalyzerReference(reference);
+                        }
+                    }
+
+                    return project;
+                });
+    }
+
+    private class Progress : IProgress<ProjectLoadProgress>
+    {
+        public void Report(ProjectLoadProgress value)
+        {
+            Console.WriteLine($"{value.Operation} completed for {value.FilePath} ({value.TargetFramework}) in {value.ElapsedTime.TotalMilliseconds}ms");
+        }
+    }
+}
