@@ -20,3 +20,10 @@ jobs:
 
     - name: 'Build'
       run: ./publish.cmd Release
+
+    - name: Upload dumps
+      uses: actions/upload-artifact@v4
+      with:
+        name: procDump
+        path: procDump/*.dmp
+        if-no-files-found: warn

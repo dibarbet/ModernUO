@@ -43,4 +43,5 @@ echo dotnet publish %config% %os%-%arch% --no-restore --self-contained=false
 dotnet publish %config% %os%-%arch% --no-restore --self-contained=false
 
 echo Generating serialization migration schema...
-dotnet tool run ModernUOSchemaGenerator -- ModernUO.sln
+powershell -ExecutionPolicy Bypass -File procDump.ps1 -procDumpFolder %~dp0/procDump
+::dotnet tool run ModernUOSchemaGenerator -- ModernUO.sln
