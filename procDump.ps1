@@ -21,7 +21,20 @@ function Run-Process([string]$fileName, [string]$arguments) {
     $processInfo.WorkingDirectory = $PSScriptRoot
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo = $processInfo
+
+    $OutEvent = Register-ObjectEvent -Action {
+        Write-Host $Event.SourceEventArgs.Data
+    } -InputObject $process -EventName OutputDataReceived
+    
+    $ErrEvent = Register-ObjectEvent -Action {
+        Write-Host $Event.SourceEventArgs.Data
+    } -InputObject $process -EventName ErrorDataReceived
+
     $process.Start() | Out-Null
+
+    $process.BeginOutputReadLine()
+    $process.BeginErrorReadLine()
+
     return $process
 }
 
@@ -40,11 +53,7 @@ if (-not (Test-Path $filePath)) {
 $toolProcess = Run-Process "dotnet.exe" "tool run ModernUOSchemaGenerator -- ModernUO.sln"
 $dumpProcess = Run-Process "$procDumpFolder\procdump.exe" "-accepteula -ma -h $($toolProcess.Id) $procDumpFolder"
 
-$dumpProcess.WaitForExit();
-
-Write-Host $toolProcess.StandardOutput.ReadToEnd();
-Write-Host $toolProcess.StandardError.ReadToEnd();
-
-Write-Host $dumpProcess.StandardOutput.ReadToEnd();
-Write-Host $dumpProcess.StandardError.ReadToEnd();
+while (-not $dumpProcess.HasExited) {
+    Start-Sleep -Seconds 1
+}
 
