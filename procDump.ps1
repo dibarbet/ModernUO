@@ -51,9 +51,16 @@ if (-not (Test-Path $filePath)) {
 
 #$process = Start-Process -FilePath "dotnet.exe" -PassThru -ArgumentList "tool run ModernUOSchemaGenerator -- ModernUO.sln"
 $toolProcess = Run-Process "dotnet.exe" "tool run ModernUOSchemaGenerator -- ModernUO.sln"
-$dumpProcess = Run-Process "$procDumpFolder\procdump.exe" "-accepteula -ma -h $($toolProcess.Id) $procDumpFolder"
+$dumpProcess = Run-Process "$procDumpFolder\procdump.exe" "-accepteula -ma -s 5 -n 5 $($toolProcess.Id) $procDumpFolder"
 
 while (-not $dumpProcess.HasExited) {
     Start-Sleep -Seconds 1
 }
+
+$toolProcess.Kill()
+
+# Start-Sleep -Seconds 30
+
+# $dumpProcess = Run-Process "$procDumpFolder\procdump.exe" "-accepteula -ma -h $($toolProcess.Id) $procDumpFolder"
+# $dumpProcess.WaitForExit()
 
